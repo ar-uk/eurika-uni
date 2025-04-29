@@ -1,0 +1,74 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=Eureka
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5432:5432"
+
+  eureka-server:
+    build:
+      context: ./eurekaServer
+      dockerfile: Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8781:8781"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - postgres
+
+  api-gateway:
+    build:
+      context: ./apiGateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - eureka-server
+
+  team-service:
+    build:
+      context: ./teamService
+      dockerfile: Dockerfile
+    container_name: team-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - eureka-server
+      - postgres
+
+  driver-service:
+    build:
+      context: ./driverService
+      dockerfile: Dockerfile
+    container_name: driver-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - eureka-server
+      - postgres
+
+  race-service:
+    build:
+      context: ./raceService
+      dockerfile: Dockerfile
+    container_name: race-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - eureka-server
+      - postgres
